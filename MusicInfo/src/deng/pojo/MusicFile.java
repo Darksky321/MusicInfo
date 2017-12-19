@@ -19,6 +19,7 @@ public class MusicFile {
 	private static final int CMP4TAGATOM_DATE = 4; // 日期
 	private static final int CMP4TAGATOM_GENRE = 5; // 流派
 	private static final int CMP4TAGATOM_COVER = 6; // 封面
+	private static final int CMP4TAGATOM_TRACK = 7; // 音轨序号
 
 	public MusicFile(String path) {
 		super();
@@ -138,6 +139,8 @@ public class MusicFile {
 					currentAtom = CMP4TAGATOM_GENRE;
 				} else if ("covr".equals(tag)) { // 解析封面图片
 					currentAtom = CMP4TAGATOM_COVER;
+				} else if ("trkn".equals(tag)) { //
+					currentAtom = CMP4TAGATOM_TRACK;
 				}
 
 				if (currentAtom != CMP4TAGATOM_ERROR) {
@@ -166,6 +169,26 @@ public class MusicFile {
 							info.setYear(new String(pRealBuf));
 							break;
 						case CMP4TAGATOM_GENRE: // 流派
+							info.setGenre(new String(pRealBuf));
+							break;
+						case CMP4TAGATOM_TRACK: // 音轨序号
+							StringBuffer sb = new StringBuffer();
+							sb.append(pRealBuf[0]).append(",");
+							sb.append(pRealBuf[1]).append(",");
+							sb.append(pRealBuf[2]).append(",");
+							sb.append(pRealBuf[3]).append(",");
+							sb.append(pRealBuf[4]).append(",");
+							sb.append(pRealBuf[5]).append(",");
+							sb.append(pRealBuf[6]).append(",");
+							sb.append(pRealBuf[7]);
+							// 前四个字节记录音轨序号,后四个字节记录专辑音轨总数
+							int trkn = (pRealBuf[3] & 0xff) | ((pRealBuf[2] << 8) & 0xff00)
+									| ((pRealBuf[1] << 16) & 0xff0000) | (pRealBuf[0] << 24);
+							/*
+							 * 专辑音轨总数 int trak = (pRealBuf[7] & 0xff) | ((pRealBuf[6] << 8) & 0xff00) |
+							 * ((pRealBuf[5] << 24) >>> 8) | (pRealBuf[4] << 24);
+							 */
+							info.setTrack(trkn + "");
 							break;
 						default:
 							break;
