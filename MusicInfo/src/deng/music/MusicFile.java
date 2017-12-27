@@ -1,16 +1,28 @@
-package deng.pojo;
+package deng.music;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.Iterator;
 
 import org.farng.mp3.MP3File;
 import org.farng.mp3.TagException;
 import org.farng.mp3.id3.AbstractID3v2;
 import org.farng.mp3.id3.ID3v1;
 
-public class MusicFile {
-	private File file;
+import deng.pojo.MusicInfo;
+
+public class MusicFile extends File {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 970152225586208967L;
+
+	public MusicFile(String path) {
+		super(path);
+		// TODO Auto-generated constructor stub
+	}
 
 	private static final int CMP4TAGATOM_ERROR = 0; // 初始化值
 	private static final int CMP4TAGATOM_ALBUM = 1; // 专辑
@@ -19,27 +31,13 @@ public class MusicFile {
 	private static final int CMP4TAGATOM_DATE = 4; // 日期
 	private static final int CMP4TAGATOM_GENRE = 5; // 流派
 	private static final int CMP4TAGATOM_COVER = 6; // 封面
-	private static final int CMP4TAGATOM_TRACK = 7; // 音轨序号
-
-	public MusicFile(String path) {
-		super();
-		this.file = new File(path);
-	}
-
-	public MusicFile(File file) {
-		super();
-		this.file = file;
-	}
-
-	public boolean exists() {
-		return this.file.exists();
-	}
+	private static final int CMP4TAGATOM_TRACKN = 7; // 音轨序号
 
 	public MusicInfo getMusicInfo() {
 		MusicInfo info = null;
-		if (this.file.getName().endsWith(".m4a") || this.file.getName().endsWith(".M4A")) {
+		if (FileTools.getSuffix(this).equalsIgnoreCase("m4a")) {
 			info = getM4AInfo();
-		} else if (this.file.getName().endsWith(".mp3") || this.file.getName().endsWith(".MP3")) {
+		} else if (FileTools.getSuffix(this).equalsIgnoreCase("mp3")) {
 			info = getID3Info();
 		}
 		return info;
@@ -49,25 +47,30 @@ public class MusicFile {
 		MusicInfo info = null;
 		MP3File mp3File;
 		try {
-			mp3File = new MP3File(this.file);
+			mp3File = new MP3File(this);
 			AbstractID3v2 id3v2 = mp3File.getID3v2Tag();
 			ID3v1 id3v1 = mp3File.getID3v1Tag();
 			if (id3v2 != null) {
 				info = new MusicInfo();
 				info.setAlbum(id3v2.getAlbumTitle());
 				info.setArtist(id3v2.getLeadArtist());
-				info.setTitle(id3v2.getSongTitle());
+				Iterator it = id3v2.iterator();
+				while(it.hasNext()) {
+					System.out.println(it.next());
+				}
+				System.out.println("----" + id3v2.getSongTitle());
+				info.setTitle(new String(id3v2.getSongTitle().getBytes("gbk"), "ISO-8859-1"));
 				info.setGenre(id3v2.getSongGenre());
 				info.setYear(id3v2.getYearReleased());
-				info.setTrack(id3v2.getTrackNumberOnAlbum());
+				info.setTrackn(id3v2.getTrackNumberOnAlbum());
 			} else if (id3v1 != null) {
 				info = new MusicInfo();
 				info.setAlbum(id3v1.getAlbumTitle());
 				info.setArtist(id3v1.getLeadArtist());
-				info.setTitle(id3v1.getSongTitle());
+				info.setTitle(new String(id3v1.getSongTitle().getBytes(), "gb2312"));
 				info.setGenre(id3v1.getSongGenre());
 				info.setYear(id3v1.getYearReleased());
-				info.setTrack(id3v1.getTrackNumberOnAlbum());
+				info.setTrackn(id3v1.getTrackNumberOnAlbum());
 			} else {
 				return null;
 			}
@@ -96,8 +99,8 @@ public class MusicFile {
 		MusicInfo info = null;
 		RandomAccessFile f;
 		try {
-			f = new RandomAccessFile(this.file, "r");
-			if (this.file.exists()) {
+			f = new RandomAccessFile(this, "r");
+			if (this.exists()) {
 				info = new MusicInfo();
 			}
 			int tagSize, lenSize, currentAtom, lRealBytes;
@@ -140,7 +143,7 @@ public class MusicFile {
 				} else if ("covr".equals(tag)) { // 解析封面图片
 					currentAtom = CMP4TAGATOM_COVER;
 				} else if ("trkn".equals(tag)) { //
-					currentAtom = CMP4TAGATOM_TRACK;
+					currentAtom = CMP4TAGATOM_TRACKN;
 				}
 
 				if (currentAtom != CMP4TAGATOM_ERROR) {
@@ -157,30 +160,21 @@ public class MusicFile {
 						// 根据ATOM类型解析实际读取的数据
 						switch (currentAtom) {
 						case CMP4TAGATOM_ALBUM: // 专辑
-							info.setAlbum(new String(pRealBuf));
+							info.setAlbum(new String(pRealBuf, "utf-8"));
 							break;
 						case CMP4TAGATOM_ARTIST: // 艺术家
-							info.setArtist(new String(pRealBuf));
+							info.setArtist(new String(pRealBuf, "utf-8"));
 							break;
 						case CMP4TAGATOM_NAME: // 名称
-							info.setTitle(new String(pRealBuf));
+							info.setTitle(new String(pRealBuf, "utf-8"));
 							break;
 						case CMP4TAGATOM_DATE: // 日期
-							info.setYear(new String(pRealBuf));
+							info.setYear(new String(pRealBuf, "utf-8"));
 							break;
 						case CMP4TAGATOM_GENRE: // 流派
-							info.setGenre(new String(pRealBuf));
+							info.setGenre(new String(pRealBuf, "utf-8"));
 							break;
-						case CMP4TAGATOM_TRACK: // 音轨序号
-							StringBuffer sb = new StringBuffer();
-							sb.append(pRealBuf[0]).append(",");
-							sb.append(pRealBuf[1]).append(",");
-							sb.append(pRealBuf[2]).append(",");
-							sb.append(pRealBuf[3]).append(",");
-							sb.append(pRealBuf[4]).append(",");
-							sb.append(pRealBuf[5]).append(",");
-							sb.append(pRealBuf[6]).append(",");
-							sb.append(pRealBuf[7]);
+						case CMP4TAGATOM_TRACKN: // 音轨序号
 							// 前四个字节记录音轨序号,后四个字节记录专辑音轨总数
 							int trkn = (pRealBuf[3] & 0xff) | ((pRealBuf[2] << 8) & 0xff00)
 									| ((pRealBuf[1] << 16) & 0xff0000) | (pRealBuf[0] << 24);
@@ -188,7 +182,7 @@ public class MusicFile {
 							 * 专辑音轨总数 int trak = (pRealBuf[7] & 0xff) | ((pRealBuf[6] << 8) & 0xff00) |
 							 * ((pRealBuf[5] << 24) >>> 8) | (pRealBuf[4] << 24);
 							 */
-							info.setTrack(trkn + "");
+							info.setTrackn(trkn + "");
 							break;
 						default:
 							break;
