@@ -6,19 +6,37 @@ public class MusicInfo {
 	private String title;
 	private String genre;
 	private String year;
+	private String trackn;
 	private String track;
 
 	public MusicInfo() {
 		super();
+		this.album = "";
+		this.artist = "";
+		this.title = "";
+		this.genre = "";
+		this.year = "";
+		this.trackn = "";
+		this.track = "";
 	}
 
-	public MusicInfo(String album, String artist, String title, String genre, String year, String track) {
+	public MusicInfo(String album, String artist, String title, String genre, String year, String trackn,
+			String track) {
 		super();
 		this.album = album;
 		this.artist = artist;
 		this.title = title;
 		this.genre = genre;
 		this.year = year;
+		this.trackn = trackn;
+		this.track = track;
+	}
+
+	public String getTrack() {
+		return track;
+	}
+
+	public void setTrack(String track) {
 		this.track = track;
 	}
 
@@ -62,12 +80,12 @@ public class MusicInfo {
 		this.year = year;
 	}
 
-	public String getTrack() {
-		return track;
+	public String getTrackn() {
+		return trackn;
 	}
 
-	public void setTrack(String track) {
-		this.track = track;
+	public void setTrackn(String trackn) {
+		this.trackn = trackn;
 	}
 
 }
