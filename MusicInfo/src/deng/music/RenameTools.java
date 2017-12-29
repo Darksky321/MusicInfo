@@ -21,7 +21,7 @@ public class RenameTools {
 		if (mi != null) {
 			String suffix = FileTools.getSuffix(mf);
 			String name = File.separator + decodeFileName(mi, newName);
-			System.out.println(mf.getParent() + File.separator + name + "." + suffix);
+			System.out.println(mf.getParent() + name + "." + suffix);
 			return mf.renameTo(new File(mf.getParent() + File.separator + name + "." + suffix));
 		} else
 			return false;
@@ -83,14 +83,14 @@ public class RenameTools {
 		int length = mi.getTrack().length();
 		String trkn = "";
 		if (length > 0 && length > mi.getTrackn().length()) {
-			trkn = String.format("%0" + length + "d", Integer.parseInt(mi.getTrackn()) + 1);
+			trkn = String.format("%0" + length + "d", Integer.parseInt(mi.getTrackn()));
 		} else {
 			trkn = mi.getTrackn();
 		}
 		name = name.replace("@trackf@", trkn);
 		String trk2 = "";
 		if (mi.getTrackn().length() < 3) {
-			trk2 = String.format("%02d", Integer.parseInt(mi.getTrackn()) + 1);
+			trk2 = String.format("%02d", Integer.parseInt(mi.getTrackn()));
 		}
 		name = name.replace("@track2@", trk2);
 		return name;

@@ -102,7 +102,7 @@ public class RenameWindow extends Frame {
 
 		Panel southPanel = new Panel();
 		southPanel.setLayout(new GridLayout(2, 1));
-		TextField textStr = new TextField("@track2@.@title@ - @artist@");
+		TextField textStr = new TextField("@track2@. @title@ - @artist@");
 		Panel panelButton = new Panel();
 		southPanel.add(textStr);
 		southPanel.add(panelButton);
